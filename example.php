@@ -16,5 +16,6 @@ require_once("Model_iCal.php");
 	        //$iCalEvent->setDtend(''); // end time
 	        $iCalEvent->setLocation("New York, NY");
 	$ical = new Application_Model_Ical($events);
-	$ical->printiCal("calendar_example");
+	//$ical->printiCal("calendar_example");
+	$ical->printiCal();
 ?>

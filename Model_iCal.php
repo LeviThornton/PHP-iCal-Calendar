@@ -90,7 +90,7 @@ class Application_Model_Ical
 				$events[]	= self::UID			.	$item->getUid();
 				$events[]	= self::STATUS		.	$item->getStatus();
 				$events[]	= self::DTSTART		.	date(DATE_ICAL, strtotime($item->getDtstart()));
-				$events[]	= self::DTEND		.	date(DATE_ICAL, strtotime($item->getDtend()));
+				if($item->getDtend())	$events[]	= self::DTEND		.	date(DATE_ICAL, strtotime($item->getDtend()));
 				$events[]	= self::LOCATION	.	$item->getLocation();
 				$events[] 	= self::END_EVENT;
 			}
