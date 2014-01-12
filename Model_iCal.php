@@ -46,8 +46,8 @@ class Application_Model_Ical
 	 * @param Array $events
 	 */
 	public function __construct($events) {
-		//header('Content-type: text/calendar; charset=utf-8');
-		//header('Content-Disposition: inline; filename=calendar.ics');
+		header('Content-type: text/calendar; charset=utf-8');
+		header('Content-Disposition: inline; filename=calendar.ics');
 
 		define('DATE_ICAL', 'Ymd\THis\Z');
 		$this->events = $events;
