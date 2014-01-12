@@ -5,24 +5,24 @@
  * @author Levi Thornton
  *
  * <code>
- * <?php
- * $events = array();
- *	$events[] = $iCalEvent = new IcalEvent();
- *		$iCalEvent->setSummery($summery);
- *		$iCalEvent->setUid($uid);
- *		$iCalEvent->setStatus($status);
- *		$iCalEvent->setDtstart($dtstart);
- *		$iCalEvent->setDtend($dtend);
- *		$iCalEvent->setLocation($location);
- *	$events[] = $iCalEvent = new IcalEvent();
- *		$iCalEvent->setSummery($summery);
- *		$iCalEvent->setUid($uid);
- *		$iCalEvent->setStatus($status);
- *		$iCalEvent->setDtstart($dtstart);
- *		$iCalEvent->setDtend($dtend);
- *		$iCalEvent->setLocation($location);
- *	Application_Model_Ical:printiCal($events);
- *  ?>
+    <?php
+	$events[] = $iCalEvent = new IcalEvent();
+	        $iCalEvent->setSummery("Christmas");
+	        $iCalEvent->setUid("500012345");
+	        $iCalEvent->setStatus("TENTATIVE");
+	        $iCalEvent->setDtstart('20070311T100000');
+	        //$iCalEvent->setDtend(''); // end time
+	        $iCalEvent->setLocation("North Pole, AK");
+	$events[] = $iCalEvent = new IcalEvent();
+	        $iCalEvent->setSummery("New Years");
+	        $iCalEvent->setUid("500012345");
+	        $iCalEvent->setStatus("TENTATIVE");
+	        $iCalEvent->setDtstart('20070311T100000');
+	        //$iCalEvent->setDtend(''); // end time
+	        $iCalEvent->setLocation("New York, NY");
+	$ical = new Application_Model_Ical($events);
+	$ical->printiCal();
+   ?>
  * </code>
  * /
 
@@ -33,51 +33,67 @@
  */
 class Application_Model_Ical
 {
-	protected $method;
-	protected $version;
-	protected $prodid;
+	const BEGIN_EVENT = "BEGIN:VEVENT";
+	const END_EVENT = "END:VEVENT";
 
-	public function __construct() {
-		header('Content-type: text/calendar; charset=utf-8');
-		header('Content-Disposition: inline; filename=calendar.ics');
+	protected  $events;
+	protected  $method;
+	protected  $version;
+	protected  $prodid;
+
+	/**
+	 *
+	 * @param Array $events
+	 */
+	public function __construct($events) {
+		//header('Content-type: text/calendar; charset=utf-8');
+		//header('Content-Disposition: inline; filename=calendar.ics');
 
 		define('DATE_ICAL', 'Ymd\THis\Z');
-
+		$this->events = $events;
 		$this->method 	= "PUBLISH";
 		$this->version 	= "2.0";
 		$this->prodid 	= "-//project_name//company_name//EN";
+		$this->events;
 	}
-	public function printiCal($objects) {
+	/**
+	 *
+	 */
+	public function printiCal() {
 		print "BEGIN:VCALENDAR"				."\r\n";
 		print "METHOD:".	$this->method	."\r\n";
-		print "VERSION".	$this->version	."\r\n";
-		print "PRODID".		$this->prodid	."\r\n";
-		foreach(prepOutput($objects) as $item) print $item	."\r\n";
+		print "VERSION:".	$this->version	."\r\n";
+		print "PRODID:".		$this->prodid	."\r\n";
+		foreach($this->prepOutput($this->events) as $item) print $item	."\r\n";
 		print "END:VCALENDAR";
 
 	}
+	/**
+	 *
+	 * @param Array $objects
+	 */
 	private function prepOutput($objects) {
 		if(is_array($objects)) {
 			foreach($objects as $object) {
-				$events[]	= "BEGIN:VEVENT";
-				$events[]	= $object->getSummery();
-				$events[]	= $object->getUid();
-				$events[]	= $object->getStatus();
-				$events[]	= date(DATE_ICAL, strtotime($object->getDtstart()));
-				$events[]	= date(DATE_ICAL, strtotime($object->getDtend()));
-				$events[]	= $object->getLocation();
-				$events[] 	= "END:VEVENT";
+				$events[]	= self::BEGIN_EVENT;
+				$events[]	= "SUMMARY:".	$object->getSummery();
+				$events[]	= "UID:".		$object->getUid();
+				$events[]	= "STATUS:". 	$object->getStatus();
+				$events[]	= "DTSTART:".	date(DATE_ICAL, strtotime($object->getDtstart()));
+				$events[]	= "DTEND:".		date(DATE_ICAL, strtotime($object->getDtend()));
+				$events[]	= "LOCATION:".	$object->getLocation();
+				$events[] 	= self::END_EVENT;
 			}
 		} elseif(is_object($objects)) {
 			$object = $objects;
-			$events[]	= "BEGIN:VEVENT";
-			$events[]	= $object->getSummery();
-			$events[]	= $object->getUid();
-			$events[]	= $object->getStatus();
-			$events[]	= date(DATE_ICAL, strtotime($object->getDtstart()));
-			$events[]	= date(DATE_ICAL, strtotime($object->getDtend()));
-			$events[]	= $object->getLocation();
-			$events[] 	= "END:VEVENT";
+			$events[]	= self::BEGIN_EVENT;
+			$events[]	= "SUMMARY:".	$object->getSummery();
+			$events[]	= "UID:".		$object->getUid();
+			$events[]	= "STATUS:". 	$object->getStatus();
+			$events[]	= "DTSTART:".	date(DATE_ICAL, strtotime($object->getDtstart()));
+			$events[]	= "DTEND:".		date(DATE_ICAL, strtotime($object->getDtend()));
+			$events[]	= "LOCATION:".	$object->getLocation();
+			$events[] 	= self::END_EVENT;
 		} else {
 			//end-stub do nothing
 			$events = array();
