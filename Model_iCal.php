@@ -21,7 +21,7 @@
 	        //$iCalEvent->setDtend(''); // end time
 	        $iCalEvent->setLocation("New York, NY");
 	$ical = new Application_Model_Ical($events);
-	$ical->printiCal();
+	$ical->printiCal("calendar_example"); // leave input blank to output to screen
    ?>
  * </code>
  * /
@@ -33,8 +33,17 @@
  */
 class Application_Model_Ical
 {
-	const BEGIN_EVENT = "BEGIN:VEVENT";
-	const END_EVENT = "END:VEVENT";
+	const BEGIN_EVENT 	= "BEGIN:VEVENT";
+	const END_EVENT 	= "END:VEVENT";
+	/*
+	 * event object field output declarations
+	 */
+	const SUMMARY		= "SUMMARY: ";
+	const UID 			= "UID: ";
+	const STATUS 		= "STATUS: ";
+	const DTSTART 		= "DTSTART: ";
+	const DTEND			= "DTEND: ";
+	const LOCATION		= "LOCATION: ";
 
 	protected  $events;
 	protected  $method;
@@ -46,9 +55,6 @@ class Application_Model_Ical
 	 * @param Array $events
 	 */
 	public function __construct($events) {
-		header('Content-type: text/calendar; charset=utf-8');
-		header('Content-Disposition: inline; filename=calendar.ics');
-
 		define('DATE_ICAL', 'Ymd\THis\Z');
 		$this->events = $events;
 		$this->method 	= "PUBLISH";
@@ -59,7 +65,11 @@ class Application_Model_Ical
 	/**
 	 *
 	 */
-	public function printiCal() {
+	public function printiCal($fileName=false) {
+		if($fileName) {
+			header('Content-type: text/calendar; charset=utf-8');
+			header('Content-Disposition: inline; filename='.$fileName.'.ics');
+		}
 		print "BEGIN:VCALENDAR"				."\r\n";
 		print "METHOD:".	$this->method	."\r\n";
 		print "VERSION:".	$this->version	."\r\n";
@@ -72,31 +82,21 @@ class Application_Model_Ical
 	 *
 	 * @param Array $objects
 	 */
-	private function prepOutput($objects) {
-		if(is_array($objects)) {
-			foreach($objects as $object) {
+	private function prepOutput($arrayItems) {
+		if(is_array($arrayItems)) {
+			foreach($arrayItems as $item) {
 				$events[]	= self::BEGIN_EVENT;
-				$events[]	= "SUMMARY:".	$object->getSummery();
-				$events[]	= "UID:".		$object->getUid();
-				$events[]	= "STATUS:". 	$object->getStatus();
-				$events[]	= "DTSTART:".	date(DATE_ICAL, strtotime($object->getDtstart()));
-				$events[]	= "DTEND:".		date(DATE_ICAL, strtotime($object->getDtend()));
-				$events[]	= "LOCATION:".	$object->getLocation();
+				$events[]	= self::SUMMARY		.	$item->getSummery();
+				$events[]	= self::UID			.	$item->getUid();
+				$events[]	= self::STATUS		.	$item->getStatus();
+				$events[]	= self::DTSTART		.	date(DATE_ICAL, strtotime($item->getDtstart()));
+				$events[]	= self::DTEND		.	date(DATE_ICAL, strtotime($item->getDtend()));
+				$events[]	= self::LOCATION	.	$item->getLocation();
 				$events[] 	= self::END_EVENT;
 			}
-		} elseif(is_object($objects)) {
-			$object = $objects;
-			$events[]	= self::BEGIN_EVENT;
-			$events[]	= "SUMMARY:".	$object->getSummery();
-			$events[]	= "UID:".		$object->getUid();
-			$events[]	= "STATUS:". 	$object->getStatus();
-			$events[]	= "DTSTART:".	date(DATE_ICAL, strtotime($object->getDtstart()));
-			$events[]	= "DTEND:".		date(DATE_ICAL, strtotime($object->getDtend()));
-			$events[]	= "LOCATION:".	$object->getLocation();
-			$events[] 	= self::END_EVENT;
 		} else {
 			//end-stub do nothing
-			$events = array();
+			$events = false;
 		}
 		return $events;
 	}
